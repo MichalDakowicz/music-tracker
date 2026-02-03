@@ -6,7 +6,6 @@ import { usePublicAlbums } from "../hooks/usePublicAlbums";
 import AlbumCard from "../features/albums/AlbumCard";
 import AlbumRow from "../features/albums/AlbumRow";
 import AlbumDetailsModal from "../features/albums/AlbumDetailsModal";
-import StatsModal from "../features/stats/StatsModal";
 import { FilterPanel } from "../components/FilterPanel";
 import {
     Popover,
@@ -33,7 +32,6 @@ export default function SharedShelf() {
     const [viewMode, setViewMode] = useState("grid"); // "grid" | "list"
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedAlbum, setSelectedAlbum] = useState(null);
-    const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
 
     // Filters & Sorting State
     const [filterFormat, setFilterFormat] = useState("All");
@@ -262,12 +260,6 @@ export default function SharedShelf() {
                 onClose={() => setSelectedAlbum(null)}
             />
 
-            <StatsModal
-                isOpen={isStatsModalOpen}
-                onClose={() => setIsStatsModalOpen(false)}
-                albums={albums}
-            />
-
             <header className="sticky top-0 z-40 border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-md px-4 py-3 sm:px-6 sm:py-4">
                 <div className="mx-auto max-w-screen-2xl flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -294,13 +286,13 @@ export default function SharedShelf() {
                                     </span>
                                 </Link>
 
-                                <button
-                                    onClick={() => setIsStatsModalOpen(true)}
+                                <Link
+                                    to={`/u/${userId}/stats`}
                                     className="rounded p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer"
                                     title="Overview"
                                 >
                                     <BarChart3 size={20} />
-                                </button>
+                                </Link>
 
                                 <button
                                     onClick={logout}
@@ -313,13 +305,13 @@ export default function SharedShelf() {
                         ) : (
                           <>
 
-                          <button
-                                    onClick={() => setIsStatsModalOpen(true)}
+                          <Link
+                                    to={`/u/${userId}/stats`}
                                     className="rounded p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer"
                                     title="Overview"
                                 >
                                     <BarChart3 size={20} />
-                          </button>
+                          </Link>
 
                             <button
                                 onClick={login}

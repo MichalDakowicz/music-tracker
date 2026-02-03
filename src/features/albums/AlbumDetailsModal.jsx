@@ -1,11 +1,17 @@
-import { X, Star, Calendar, Music, StickyNote, Store } from "lucide-react";
+import { X, Calendar, Music, StickyNote, Store } from "lucide-react";
 
 export default function AlbumDetailsModal({ isOpen, onClose, album }) {
   if (!isOpen || !album) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl bg-neutral-900 border border-neutral-800 shadow-2xl max-h-[90vh] flex flex-col">
+    <div 
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+        onClick={onClose}
+    >
+      <div 
+        className="relative w-full max-w-2xl overflow-hidden rounded-2xl bg-neutral-900 border border-neutral-800 shadow-2xl max-h-[90vh] flex flex-col animate-in slide-in-from-bottom-4 zoom-in-95 duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header Image Background */}
         <div className="relative h-48 w-full shrink-0 overflow-hidden">
              
@@ -43,38 +49,25 @@ export default function AlbumDetailsModal({ isOpen, onClose, album }) {
             
             {/* Metadata Grid */}
             <div className="grid grid-cols-2 gap-4">
-                <div className="bg-neutral-800/50 rounded-lg p-3 border border-neutral-800">
+                <div className="bg-neutral-800/10 rounded-lg p-3 border border-neutral-800">
                     <div className="text-xs text-neutral-500 uppercase font-bold mb-1">Release Date</div>
                     <div className="flex items-center gap-2 text-neutral-200">
                         <Calendar size={16} className="text-emerald-500"/>
-                        {album.releaseDate || 'Unknown'}
+                        <span className="font-mono text-sm">{album.releaseDate || 'Unknown'}</span>
                     </div>
                 </div>
-                <div className="bg-neutral-800/50 rounded-lg p-3 border border-neutral-800">
+                <div className="bg-neutral-800/10 rounded-lg p-3 border border-neutral-800">
                     <div className="text-xs text-neutral-500 uppercase font-bold mb-1">Formats</div>
-                     <div className="flex flex-wrap gap-1">
+                     <div className="flex flex-wrap gap-1.5">
                         {(Array.isArray(album.format) ? album.format : [album.format || "Digital"]).map((fmt, i) => (
-                             <span key={i} className="px-2 py-0.5 rounded text-xs bg-neutral-700 text-neutral-300 border border-neutral-600">
+                             <span key={i} className="px-2 py-0.5 rounded text-xs bg-neutral-900 text-neutral-300 border border-neutral-700 font-medium">
                                 {fmt}
                              </span>
                         ))}
                     </div>
                 </div>
-                {album.rating > 0 && (
-                    <div className="bg-neutral-800/50 rounded-lg p-3 border border-neutral-800">
-                        <div className="text-xs text-neutral-500 uppercase font-bold mb-1">Rating</div>
-                        <div className="flex items-center gap-1">
-                             {[1, 2, 3, 4, 5].map((s) => (
-                                <Star 
-                                    key={s} 
-                                    size={16} 
-                                    className={`${s <= album.rating ? "text-yellow-400 fill-yellow-400" : "text-neutral-700"}`} 
-                                />
-                             ))}
-                        </div>
-                    </div>
-                )}
-                 <div className="bg-neutral-800/50 rounded-lg p-3 border border-neutral-800">
+
+                 <div className="bg-neutral-800/10 rounded-lg p-3 border border-neutral-800">
                     <div className="text-xs text-neutral-500 uppercase font-bold mb-1">Genres</div>
                     <div className="flex flex-wrap gap-1">
                          {album.genres && album.genres.length > 0 ? (
@@ -84,7 +77,7 @@ export default function AlbumDetailsModal({ isOpen, onClose, album }) {
                                  </span>
                              ))
                          ) : (
-                             <span className="text-neutral-500 italic">No genres listed</span>
+                             <span className="text-neutral-500 italic text-sm">No genres listed</span>
                          )}
                     </div>
                 </div>
@@ -92,11 +85,11 @@ export default function AlbumDetailsModal({ isOpen, onClose, album }) {
 
             {/* Notes Section */}
             {album.notes && (
-                <div className="space-y-2">
-                    <h3 className="text-sm font-bold text-neutral-400 uppercase flex items-center gap-2">
-                        <StickyNote size={14} /> Notes
+                <div className="space-y-2 pt-2">
+                    <h3 className="text-xs font-bold text-neutral-400 uppercase flex items-center gap-2 tracking-wide">
+                        <StickyNote size={14} /> Personal Notes
                     </h3>
-                    <div className="p-4 rounded-lg bg-neutral-800/30 border border-neutral-800 text-neutral-300 leading-relaxed whitespace-pre-wrap">
+                    <div className="p-4 rounded-xl bg-neutral-800/30 border border-neutral-800/50 text-neutral-300 leading-relaxed whitespace-pre-wrap text-sm">
                         {album.notes}
                     </div>
                 </div>

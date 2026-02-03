@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Check, Star, Link, Trash2 } from "lucide-react";
+import { X, Check, Link, Trash2, Library, Heart, Clock, Disc, Disc3, CassetteTape, FileAudio } from "lucide-react";
 
 export default function EditAlbumModal({ isOpen, onClose, album, onUpdate, onDelete }) {
   const [activeTab, setActiveTab] = useState("main"); // "main" | "details"
@@ -11,8 +11,9 @@ export default function EditAlbumModal({ isOpen, onClose, album, onUpdate, onDel
   const [artistInput, setArtistInput] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
   const [releaseDate, setReleaseDate] = useState("");
-  const [rating, setRating] = useState(0);
-  const [status, setStatus] = useState("Collection");
+
+  const [status, setStatus] = useState("Collection"); // Collection, Wishlist, Pre-order
+  const [albumUrl, setAlbumUrl] = useState("");
 
   // -- Details Fields --
   const [notes, setNotes] = useState("");
@@ -29,8 +30,8 @@ export default function EditAlbumModal({ isOpen, onClose, album, onUpdate, onDel
       setActiveTab("main");
       setFormats(Array.isArray(album.format) ? album.format : [album.format || "Digital"]);
       setTitle(album.title || "");
-      setRating(album.rating || 0);
       setStatus(album.status || "Collection");
+      setAlbumUrl(album.url || "");
       
       // Artist Logic
       if (Array.isArray(album.artist)) {
@@ -91,7 +92,7 @@ export default function EditAlbumModal({ isOpen, onClose, album, onUpdate, onDel
         artist,
         coverUrl,
         releaseDate,
-        rating,
+        url: albumUrl,
         status,
         // New Fields
         notes,
@@ -124,168 +125,206 @@ export default function EditAlbumModal({ isOpen, onClose, album, onUpdate, onDel
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 delay-75 animate-in fade-in duration-200" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={onClose}>
       <div 
-        className="w-full max-w-2xl rounded-xl bg-neutral-900 border border-neutral-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" 
+        className="w-full max-w-2xl rounded-xl bg-neutral-900 border border-neutral-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 zoom-in-95 duration-300" 
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-neutral-800 p-4 shrink-0 bg-neutral-900">
+        <div className="flex items-center justify-between border-b border-neutral-800 p-4 shrink-0 bg-neutral-900 z-10">
           <h2 className="text-lg font-bold text-white">Edit Album</h2>
-          <button onClick={onClose} className="text-neutral-400 hover:text-white cursor-pointer">
+          <button 
+            onClick={onClose} 
+            className="rounded-full p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors"
+          >
             <X size={20} />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex bg-neutral-900/50 border-b border-neutral-800 shrink-0">
+        <div className="px-4 pt-4 pb-0">
+          <div className="flex p-1 bg-neutral-950 rounded-lg border border-neutral-800">
             <button
-                onClick={() => setActiveTab("main")}
-                className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-                activeTab === "main" ? "bg-neutral-800 text-white border-b-2 border-emerald-500" : "text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300"
-                }`}
+              onClick={() => setActiveTab("main")}
+              className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                activeTab === "main" ? "bg-neutral-800 text-white shadow-sm" : "text-neutral-400 hover:text-neutral-200"
+              }`}
             >
-                General
+              Main Info
             </button>
             <button
-                onClick={() => setActiveTab("details")}
-                className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-                activeTab === "details" ? "bg-neutral-800 text-white border-b-2 border-emerald-500" : "text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300"
-                }`}
+              onClick={() => setActiveTab("details")}
+              className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                activeTab === "details" ? "bg-neutral-800 text-white shadow-sm" : "text-neutral-400 hover:text-neutral-200"
+              }`}
             >
-                Details & Notes
+              Details & Notes
             </button>
+          </div>
         </div>
 
-        <div className="p-4 space-y-4 overflow-y-auto custom-scrollbar">
+        <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar">
           
           {/* --- MAIN TAB --- */}
           {activeTab === "main" && (
-            <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-300">
-                <div className="flex gap-4">
-                    <div className="shrink-0">
-                    <img 
-                        src={coverUrl || album.coverUrl} 
-                        alt="Cover" 
-                        className="h-28 w-28 rounded object-cover bg-neutral-800 shadow-lg border border-neutral-800" 
-                        onError={(e) => e.target.src = "https://placehold.co/400/262626/10b981/png?text=No+Cover"}
-                    />
+            <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
+                <div className="flex gap-5">
+                    <div className="shrink-0 group relative">
+                        <div className="h-40 w-40 rounded-lg overflow-hidden border border-neutral-800 shadow-xl bg-neutral-950">
+                            <img 
+                                src={coverUrl || album.coverUrl} 
+                                alt="Cover" 
+                                className="h-full w-full object-cover transition-opacity duration-300"
+                                onError={(e) => e.target.src = "https://placehold.co/400/262626/10b981/png?text=No+Cover"}
+                            />
+                        </div>
                     </div>
                     
-                    <div className="flex-1 min-w-0 flex flex-col justify-between h-28">
-                    <div>
-                        <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1">Album Title</label>
+                    <div className="flex-1 min-w-0 flex flex-col gap-3">
+                        <div>
+                            <label className="text-xs font-medium text-neutral-500 uppercase mb-1.5 block">Album Title</label>
+                            <input 
+                                type="text" 
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                className="w-full bg-neutral-800 border-transparent focus:border-emerald-500 rounded-md px-3 py-2 text-base text-white font-semibold placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                                placeholder="Album Title"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-medium text-neutral-500 uppercase mb-1.5 block">Artist(s)</label>
+                            <div className="flex flex-wrap gap-1.5 mb-2">
+                                {artist.map((a, i) => (
+                                    <span key={i} className="flex items-center gap-1.5 bg-neutral-800 text-xs px-2 py-1 rounded-md text-neutral-200 border border-neutral-700/50">
+                                        <span className="truncate max-w-30" title={a}>{a}</span>
+                                        <button onClick={() => removeArtist(i)} className="text-neutral-500 hover:text-red-400 transition-colors p-0.5 rounded-full hover:bg-neutral-700/50">
+                                            <X size={12} />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                            <div className="flex gap-2">
+                                <input 
+                                    type="text" 
+                                    value={artistInput}
+                                    onChange={(e) => setArtistInput(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && addArtist()}
+                                    placeholder="Add artist..."
+                                    className="flex-1 bg-neutral-800 border-transparent focus:border-neutral-600 rounded-md px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-neutral-700 transition-colors"
+                                />
+                                <button 
+                                    onClick={addArtist} 
+                                    disabled={!artistInput.trim()}
+                                    className="bg-neutral-800 text-emerald-500 disabled:text-neutral-600 font-semibold px-3 py-1.5 rounded-md text-xs hover:bg-neutral-700 transition-colors uppercase tracking-wide border border-transparent hover:border-neutral-600"
+                                >
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-5">
+                    <div className="col-span-2">
+                        <label className="text-xs font-medium text-neutral-500 uppercase mb-1.5 flex items-center gap-2">
+                            <Link size={12} /> Cover Image URL
+                        </label>
                         <input 
                             type="text" 
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            className="w-full rounded bg-neutral-950 border border-neutral-800 px-3 py-1.5 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                            value={coverUrl}
+                            onChange={(e) => setCoverUrl(e.target.value)}
+                            placeholder="https://..."
+                            className="w-full bg-neutral-800 border-transparent focus:border-emerald-500 rounded-md px-3 py-2 text-sm text-neutral-300 font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                        />
+                    </div>
+
+                    <div className="col-span-2">
+                        <label className="text-xs font-medium text-neutral-500 uppercase mb-1.5 flex items-center gap-2">
+                            <Link size={12} /> Album Link / Spotify URL
+                        </label>
+                        <input 
+                            type="text" 
+                            value={albumUrl}
+                            onChange={(e) => setAlbumUrl(e.target.value)}
+                            placeholder="https://open.spotify.com/album/..."
+                            className="w-full bg-neutral-800 border-transparent focus:border-emerald-500 rounded-md px-3 py-2 text-sm text-neutral-300 font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                        />
+                    </div>
+                    
+                    <div>
+                        <label className="text-xs font-medium text-neutral-500 uppercase mb-1.5 block">Release Date</label>
+                        <input 
+                            type="text" 
+                            value={releaseDate}
+                            onChange={(e) => setReleaseDate(e.target.value)}
+                            placeholder="YYYY-MM-DD"
+                            className="w-full bg-neutral-800 border-transparent focus:border-emerald-500 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1">Artist</label>
-                        <div className="flex flex-wrap gap-1 mb-1 max-h-16 overflow-y-auto custom-scrollbar">
-                                {artist.map((a, i) => (
-                                    <span key={i} className="flex items-center gap-1 bg-neutral-800 text-[10px] px-1.5 py-0.5 rounded text-neutral-300 border border-neutral-700">
-                                        <span className="truncate max-w-20" title={a}>{a}</span>
-                                        <button onClick={() => removeArtist(i)} className="hover:text-white cursor-pointer"><X size={10} /></button>
-                                    </span>
-                                ))}
+                        <label className="text-xs font-medium text-neutral-500 uppercase mb-1.5 block">Status</label>
+                        <div className="flex bg-neutral-800 p-1 rounded-lg">
+                            <button
+                                onClick={() => setStatus("Collection")}
+                                className={`flex-1 flex items-center justify-center p-1.5 rounded-md transition-all ${
+                                    status === "Collection" 
+                                    ? "bg-emerald-500 text-black shadow-sm" 
+                                    : "text-neutral-500 hover:text-neutral-300"
+                                }`}
+                                title="Collection"
+                            >
+                                <Library size={16} strokeWidth={status === "Collection" ? 2.5 : 2} />
+                            </button>
+                            <button
+                                onClick={() => setStatus("Wishlist")}
+                                className={`flex-1 flex items-center justify-center p-1.5 rounded-md transition-all ${
+                                    status === "Wishlist" 
+                                    ? "bg-pink-500 text-white shadow-sm" 
+                                    : "text-neutral-500 hover:text-neutral-300"
+                                }`}
+                                title="Wishlist"
+                            >
+                                <Heart size={16} strokeWidth={status === "Wishlist" ? 2.5 : 2} />
+                            </button>
+                            <button
+                                onClick={() => setStatus("Pre-order")}
+                                className={`flex-1 flex items-center justify-center p-1.5 rounded-md transition-all ${
+                                    status === "Pre-order" 
+                                    ? "bg-blue-500 text-white shadow-sm" 
+                                    : "text-neutral-500 hover:text-neutral-300"
+                                }`}
+                                title="Pre-order"
+                            >
+                                <Clock size={16} strokeWidth={status === "Pre-order" ? 2.5 : 2} />
+                            </button>
                         </div>
-                        <div className="flex gap-1">
-                            <input 
-                                type="text" 
-                                value={artistInput}
-                                onChange={(e) => setArtistInput(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && addArtist()}
-                                placeholder="Add Artist"
-                                className="w-full rounded bg-neutral-950 border border-neutral-800 px-2 py-1 text-xs text-white focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                            />
-                            <button onClick={addArtist} className="bg-neutral-800 text-white px-2 py-1 rounded border border-neutral-700 hover:bg-neutral-700 cursor-pointer text-[10px] font-bold">Add</button>
-                        </div>
-                    </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
-                    <div className="col-span-2">
-                            <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1">Cover Image URL</label>
-                            <input 
-                                type="text" 
-                                value={coverUrl}
-                                onChange={(e) => setCoverUrl(e.target.value)}
-                                placeholder="https://..."
-                                className="w-full rounded bg-neutral-950 border border-neutral-800 px-3 py-2 text-sm text-neutral-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
-                            />
-                        </div>
-                    <div>
-                            <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1">Release Date</label>
-                            <input 
-                                type="text" 
-                                value={releaseDate}
-                                onChange={(e) => setReleaseDate(e.target.value)}
-                                placeholder="YYYY-MM-DD"
-                                className="w-full rounded bg-neutral-950 border border-neutral-800 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                    <div className="flex-1">
-                        <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1">Rating</label>
-                        <div className="flex gap-1" style={{ height: "30px", alignItems: "center" }}>
-                            {[1, 2, 3, 4, 5].map((star) => (
-                            <button
-                                key={star}
-                                onClick={() => setRating(star)}
-                                className={`transition-colors cursor-pointer ${star <= rating ? "text-yellow-400" : "text-neutral-700 hover:text-neutral-500"}`}
-                            >
-                                <Star size={20} fill={star <= rating ? "currentColor" : "none"} />
-                            </button>
-                            ))}
-                            {rating > 0 && (
-                            <button onClick={() => setRating(0)} className="text-xs text-neutral-600 hover:text-neutral-400 ml-2 cursor-pointer">
-                                Clear
-                            </button>
-                            )}
-                        </div>
-                    </div>
-                    
-                    <div className="flex-1">
-                        <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1">Status</label>
-                        <select 
-                            value={status} 
-                            onChange={(e) => setStatus(e.target.value)}
-                            className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1.5 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 appearance-none cursor-pointer"
-                        >
-                                <option value="Collection">Collection</option>
-                                <option value="Wishlist">Wishlist</option>
-                                <option value="Pre-order">Pre-order</option>
-
-                        </select>
-                    </div>
-                    </div>
-
-                <div className="pt-2 border-t border-neutral-800">
-                    <div className="flex justify-between items-baseline mb-3">
-                        <label className="block text-xs font-semibold text-neutral-400 uppercase tracking-wide">Formats in Collection</label>
-                    </div>
-                    
+                <div className="pt-4 border-t border-neutral-800/50">
+                    <label className="text-xs font-medium text-neutral-400 uppercase mb-3 block">Formats in Collection</label>
                     <div className="flex flex-wrap gap-2">
-                        {["Digital", "Vinyl", "CD", "Cassette"].map((f) => {
-                        const isSelected = formats.includes(f);
+                        {[
+                            { id: "Digital", icon: FileAudio },
+                            { id: "Vinyl", icon: Disc },
+                            { id: "CD", icon: Disc3 },
+                            { id: "Cassette", icon: CassetteTape }
+                        ].map((f) => {
+                        const isSelected = formats.includes(f.id);
+                        const Icon = f.icon;
                         return (
                             <button
-                            key={f}
-                            onClick={() => toggleFormat(f)}
-                            className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-all border cursor-pointer ${
+                            key={f.id}
+                            onClick={() => toggleFormat(f.id)}
+                            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all border cursor-pointer select-none ${
                                 isSelected
-                                ? "bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
-                                : "bg-neutral-950 border-neutral-800 text-neutral-500 hover:border-neutral-700 hover:text-neutral-300"
+                                ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400 shadow-[0_0_10px_-3px_rgba(16,185,129,0.3)]"
+                                : "bg-neutral-900 border-neutral-800 text-neutral-500 hover:border-neutral-700 hover:text-neutral-300 hover:bg-neutral-800"
                             }`}
                             >
-                            {isSelected && <Check size={14} />}
-                            {f}
+                             <Icon size={14} strokeWidth={2.5} className={isSelected ? "text-emerald-500" : "text-neutral-500 group-hover:text-neutral-300"} />
+                            {f.id}
                             </button>
                         );
                         })}
@@ -296,77 +335,81 @@ export default function EditAlbumModal({ isOpen, onClose, album, onUpdate, onDel
 
           {/* --- DETAILS TAB --- */}
           {activeTab === "details" && (
-            <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                <div>
-                <label className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider block mb-1">Personal Notes / Review</label>
-                <textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    rows={6}
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm text-neutral-300 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-none placeholder-neutral-700"
-                    placeholder="Write your thoughts regarding this album, sound quality, memories..."
-                />
-                </div>
-
-                <div>
-                <label className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider block mb-1">Favorite Tracks</label>
-                <input
-                    type="text"
-                    value={favoriteTracks}
-                    onChange={(e) => setFavoriteTracks(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 placeholder-neutral-700"
-                    placeholder="e.g. Track 1, Track 4..."
-                />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                    <label className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider block mb-1">Acquired Date</label>
-                    <input
-                        type="date"
-                        value={acquisitionDate}
-                        onChange={(e) => setAcquisitionDate(e.target.value)}
-                        className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1.5 text-sm text-neutral-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                    />
-                    </div>
-                </div>
+            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
                 
-                <div className="grid grid-cols-2 gap-4">
+                {/* Note Area */}
+                <div>
+                    <label className="text-xs font-medium text-neutral-500 uppercase mb-1.5 block">Review / Notes</label>
+                    <textarea
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        rows={5}
+                        className="w-full bg-neutral-800 border-transparent focus:border-emerald-500 rounded-md px-3 py-2 text-sm text-neutral-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none placeholder-neutral-600 leading-relaxed"
+                        placeholder="Write your thoughts regarding this album, sound quality, memories..."
+                    />
+                </div>
+
+
+
+                <div>
+                    <label className="text-xs font-medium text-neutral-500 uppercase mb-1.5 block">Favorite Tracks</label>
+                    <input
+                        type="text"
+                        value={favoriteTracks}
+                        onChange={(e) => setFavoriteTracks(e.target.value)}
+                        className="w-full bg-neutral-800 border-transparent focus:border-emerald-500 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 placeholder-neutral-600"
+                        placeholder="e.g. Track 1, Track 4..."
+                    />
+                </div>
+
+                <div className="grid grid-cols-2 gap-5">
+                    <div>
+                        <label className="text-xs font-medium text-neutral-500 uppercase mb-1.5 block">Acquired Date</label>
+                        <input
+                            type="date"
+                            value={acquisitionDate}
+                            onChange={(e) => setAcquisitionDate(e.target.value)}
+                            className="w-full bg-neutral-800 border-transparent focus:border-emerald-500 rounded-md px-3 py-2 text-sm text-neutral-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 scheme-dark"
+                        />
+                    </div>
                      <div>
-                        <label className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider block mb-1">Store / Source</label>
+                        <label className="text-xs font-medium text-neutral-500 uppercase mb-1.5 block">Store / Source</label>
                         <input
                             type="text"
                             value={storeName}
                             onChange={(e) => setStoreName(e.target.value)}
-                            className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1.5 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 placeholder-neutral-700"
+                            className="w-full bg-neutral-800 border-transparent focus:border-emerald-500 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 placeholder-neutral-600"
                             placeholder="e.g. Local Record Shop"
                         />
                      </div>
-                    <div>
-                    <label className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider block mb-1">Price Paid</label>
-                    <div className="relative">
-                        <span className="absolute left-2 top-1.5 text-neutral-500 text-sm">$</span>
-                        <input
-                            type="number"
-                            step="0.01"
-                            value={pricePaid}
-                            onChange={(e) => setPricePaid(e.target.value)}
-                            className="w-full bg-neutral-950 border border-neutral-800 rounded pl-5 pr-2 py-1.5 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 placeholder-neutral-700"
-                            placeholder="0.00"
-                        />
-                    </div>
-                    </div>
                 </div>
 
-                <div>
-                <label className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider block mb-1">Catalog Number / Pressing</label>
-                <input
-                    type="text"
-                    value={catalogNumber}
-                    onChange={(e) => setCatalogNumber(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 placeholder-neutral-700"
-                    placeholder="e.g. ABC-1234, 1st Pressing"
-                />
+                <div className="grid grid-cols-2 gap-5">
+                    <div>
+                        <label className="text-xs font-medium text-neutral-500 uppercase mb-1.5 block">Price Paid</label>
+                        <div className="relative">
+                            <span className="absolute left-3 top-2 text-neutral-500 text-sm">$</span>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={pricePaid}
+                                onChange={(e) => setPricePaid(e.target.value)}
+                                className="w-full bg-neutral-800 border-transparent focus:border-emerald-500 rounded-md pl-6 pr-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 placeholder-neutral-600"
+                                placeholder="0.00"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="text-xs font-medium text-neutral-500 uppercase mb-1.5 block">Catalog Number</label>
+                        <input
+                            type="text"
+                            value={catalogNumber}
+                            onChange={(e) => setCatalogNumber(e.target.value)}
+                            className="w-full bg-neutral-800 border-transparent focus:border-emerald-500 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 placeholder-neutral-600"
+                            placeholder="e.g. ABC-1234"
+                        />
+                    </div>
                 </div>
             </div>
           )}

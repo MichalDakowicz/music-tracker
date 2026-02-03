@@ -66,8 +66,14 @@ export default function RandomSpinModal({ isOpen, onClose, albums, onSelect }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-sm bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden relative">
+    <div 
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+        onClick={onClose}
+    >
+      <div 
+        className="w-full max-w-sm bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden relative animate-in slide-in-from-bottom-4 zoom-in-95 duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button 
             onClick={onClose} 
             className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 hover:bg-neutral-800 text-white transition-colors"

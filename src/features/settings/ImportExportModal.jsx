@@ -29,14 +29,13 @@ export default function ImportExportModal({ isOpen, onClose, albums, addAlbum, r
   };
 
   const handleExportCSV = () => {
-    const headers = ['Title', 'Artist', 'Year', 'Format', 'Status', 'Rating', 'SpotifyURL'];
+    const headers = ['Title', 'Artist', 'Year', 'Format', 'Status', 'SpotifyURL'];
     const rows = albums.map(a => [
         `"${(a.title || "").replace(/"/g, '""')}"`,
         `"${(Array.isArray(a.artist) ? a.artist.join(", ") : (a.artist || "")).replace(/"/g, '""')}"`,
         a.releaseDate || "",
         a.format || "",
         a.status || "",
-        a.rating || "",
         a.url || ""
     ]);
     const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -115,6 +114,118 @@ export default function ImportExportModal({ isOpen, onClose, albums, addAlbum, r
         }
     }
 
+    // TRY CSV IMPORT
+    const firstLine = importText.trim().split('\n')[0];
+    const isCSV = firstLine && (firstLine.includes(',') || firstLine.toLowerCase().includes('title,artist')); // Simple Heuristic
+
+    if (isCSV && !importText.includes('spotify.com') && !importText.includes('spotify:album:')) {
+         try {
+             // Simple CSV Parser
+             const parseCSVLine = (line) => {
+                 const result = [];
+                 let startValueIndex = 0;
+                 let inQuote = false;
+                 
+                 for (let i = 0; i < line.length; i++) {
+                     if (line[i] === '"') {
+                         inQuote = !inQuote;
+                     } else if (line[i] === ',' && !inQuote) {
+                         let val = line.substring(startValueIndex, i).trim();
+                         // Unescape quotes
+                         if (val.startsWith('"') && val.endsWith('"')) {
+                             val = val.substring(1, val.length - 1).replace(/""/g, '"');
+                         }
+                         result.push(val);
+                         startValueIndex = i + 1;
+                     }
+                 }
+                 // Last value
+                 let val = line.substring(startValueIndex).trim();
+                 if (val.startsWith('"') && val.endsWith('"')) {
+                     val = val.substring(1, val.length - 1).replace(/""/g, '"');
+                 }
+                 result.push(val);
+                 
+                 return result;
+             };
+
+             const lines = importText.trim().split('\n');
+             // Assume first line is header if it contains 'Title'
+             const headerStr = lines[0].toLowerCase();
+             let startRow = 0;
+             let colMap = { title: 0, artist: 1, year: 2, format: 3, status: 4, url: 5 }; // default indices based on export
+
+             if (headerStr.includes('title') && headerStr.includes('artist')) {
+                 const headers = parseCSVLine(lines[0].toLowerCase());
+                 colMap = {
+                     title: headers.indexOf('title'),
+                     artist: headers.indexOf('artist'),
+                     year: headers.indexOf('year'),
+                     format: headers.indexOf('format'),
+                     status: headers.indexOf('status'),
+                     url: headers.indexOf('spotifyurl') > -1 ? headers.indexOf('spotifyurl') : headers.indexOf('url')
+                 };
+                 startRow = 1;
+             }
+
+             let count = 0;
+             for (let i = startRow; i < lines.length; i++) {
+                 count++;
+                 if (!lines[i].trim()) continue;
+
+                 try {
+                     const cols = parseCSVLine(lines[i]);
+                     const title = cols[colMap.title];
+                     const artistStr = cols[colMap.artist];
+                     
+                     if (!title) continue;
+
+                     // Normalize Artist
+                     const artist = artistStr.includes(',') && !artistStr.includes(', ') ? artistStr.split(',') : [artistStr];
+
+
+                     const normalizeArtist = (val) => {
+                        if (Array.isArray(val)) return val.join(", ").toLowerCase();
+                        return (val || "").toString().toLowerCase();
+                     }
+
+                     const isDuplicate = albums.some(a => 
+                         (a.title.toLowerCase() === title.toLowerCase() && normalizeArtist(a.artist) === normalizeArtist(artist))
+                     );
+                     
+                     if (isDuplicate) {
+                         logs.push({ status: 'error', message: `Skipped Duplicate: ${title}` });
+                     } else {
+                        await addAlbum({
+                             title,
+                             artist,
+                             releaseDate: cols[colMap.year] || "",
+                             format: cols[colMap.format] || "Digital",
+                             status: cols[colMap.status] || "Collection",
+                             url: cols[colMap.url] || "",
+                             addedAt: Date.now(),
+                        });
+                        logs.push({ status: 'success', message: `Imported: ${title}` });
+                     }
+
+                 } catch (err) {
+                      logs.push({ status: 'error', message: `Failed Row ${i + 1}: ${err.message}` });
+                 }
+                 
+                 if (count % 10 === 0) updateLogs();
+             }
+             
+             updateLogs();
+             setIsImporting(false);
+             if (logs.every(l => l.status === 'success')) setImportText("");
+             return;
+
+         } catch (e) {
+             console.error("CSV Import Failed", e);
+             logs.push({ status: 'error', message: `CSV Parsing Error: ${e.message}` });
+         }
+    }
+
     const lines = importText.split('\n').filter(l => l.trim());
     let count = 0;
     
@@ -152,8 +263,14 @@ export default function ImportExportModal({ isOpen, onClose, albums, addAlbum, r
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-neutral-900 border border-neutral-800 shadow-2xl flex flex-col max-h-[90vh]">
+    <div 
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+        onClick={onClose}
+    >
+      <div 
+        className="w-full max-w-2xl overflow-hidden rounded-2xl bg-neutral-900 border border-neutral-800 shadow-2xl flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 zoom-in-95 duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-neutral-800 p-6">
           <h2 className="text-xl font-bold text-white">Data Management</h2>
@@ -255,16 +372,52 @@ export default function ImportExportModal({ isOpen, onClose, albums, addAlbum, r
                     <div className="space-y-2">
                         <h3 className="text-white font-medium">Add Multiple Albums</h3>
                         <p className="text-sm text-neutral-400">
-                            Paste a list of Spotify Album URLs (one per line) to batch import them into your collection.
+                            Paste a list of Spotify Album URLs (one per line) or paste raw JSON / CSV data to batch import.
                         </p>
+                         <div className="flex items-center gap-4"> 
+                              <textarea
+                                  value={importText}
+                                  onChange={(e) => setImportText(e.target.value)}
+                                  placeholder={'https://open.spotify.com/...\n\n[{"title": "Album", ...}]\n\nTitle,Artist,Year...'}
+                                  className="w-full h-40 rounded-lg bg-neutral-950 border border-neutral-800 p-4 text-sm font-mono text-neutral-300 focus:border-emerald-500 focus:outline-none resize-none"
+                              />
+                        </div>
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t border-neutral-800" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-neutral-900 px-2 text-neutral-500">Or upload file</span>
+                            </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-center w-full">
+                            <label htmlFor="json-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-neutral-800 border-dashed rounded-lg cursor-pointer bg-neutral-950/50 hover:bg-neutral-900 hover:border-emerald-500/50 transition-colors">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <div className="flex gap-2 mb-3 text-neutral-400">
+                                        <FileJson className="w-8 h-8" />
+                                        <FileSpreadsheet className="w-8 h-8" />
+                                    </div>
+                                    <p className="mb-2 text-sm text-neutral-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                    <p className="text-xs text-neutral-500">JSON or CSV files</p>
+                                </div>
+                                <input 
+                                    id="json-upload" 
+                                    type="file" 
+                                    accept=".json, .csv"
+                                    className="hidden" 
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            const reader = new FileReader();
+                                            reader.onload = (e) => setImportText(e.target.result);
+                                            reader.readAsText(file);
+                                        }
+                                    }}
+                                />
+                            </label>
+                        </div>
                     </div>
-
-                    <textarea
-                        value={importText}
-                        onChange={(e) => setImportText(e.target.value)}
-                        placeholder={'https://open.spotify.com/album/...\nhttps://open.spotify.com/album/...\nspotify:album:123...'}
-                        className="w-full h-40 rounded-lg bg-neutral-950 border border-neutral-800 p-4 text-sm font-mono text-neutral-300 focus:border-emerald-500 focus:outline-none resize-none"
-                    />
 
                     <button 
                         onClick={handleImport}

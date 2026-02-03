@@ -72,7 +72,6 @@ export function FilterPanel({
                     options={[
                         { value: "custom", label: "Custom" },
                         { value: "addedAt", label: "Recently Added" },
-                        { value: "rating", label: "Highest Rated" },
                         { value: "releaseDate", label: "Release Date" },
                         { value: "artist", label: "Artist" },
                         { value: "title", label: "Title" },

@@ -1,31 +1,19 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import Logo from "../components/ui/Logo";
 import { useAuth } from "../features/auth/AuthContext";
 import { useAlbums } from "../hooks/useAlbums";
 import { useToast } from "../components/ui/Toast";
 import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
-import { Link } from "react-router-dom";
 import AlbumCard from "../features/albums/AlbumCard";
 import AlbumRow from "../features/albums/AlbumRow";
-import AddAlbumModal from "../features/albums/AddAlbumModal";
 import EditAlbumModal from "../features/albums/EditAlbumModal";
-import StatsModal from "../features/stats/StatsModal";
-import ImportExportModal from "../features/settings/ImportExportModal";
 import RandomSpinModal from "../features/albums/RandomSpinModal";
 import { FilterPanel } from "../components/FilterPanel";
+import { Navbar } from "../components/layout/Navbar";
 import {
-    LogOut,
-    Plus,
     LayoutGrid,
     List as ListIcon,
     Search,
-    Shuffle,
     Layers,
-    BarChart3,
-    Clock,
-    Database,
-    Share2,
-    Menu,
 } from "lucide-react";
 import {
     DndContext,
@@ -113,17 +101,13 @@ function usePersistedState(key, defaultValue) {
 }
 
 export default function Home() {
-    const { logout, user } = useAuth();
+    const { user } = useAuth();
     const { albums, loading, addAlbum, updateAlbum, removeAlbum } = useAlbums();
     const { toast } = useToast();
 
     const [viewMode, setViewMode] = usePersistedState("mt_viewMode", "grid");
     const [groupBy, setGroupBy] = usePersistedState("mt_groupBy", "none");
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
-    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [isSpinModalOpen, setIsSpinModalOpen] = useState(false);
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [editingAlbum, setEditingAlbum] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -462,179 +446,12 @@ export default function Home() {
         setSearchQuery("");
     };
 
-    const handleShareShelf = () => {
-        if (!user) return;
-        const url = `${window.location.origin}/u/${user.uid}`;
-        navigator.clipboard.writeText(url);
-        toast({
-            title: "Link Copied!",
-            description: "Public shelf link copied to your clipboard.",
-            variant: "default",
-        });
-    };
-
     return (
         <div
             className="min-h-screen bg-neutral-950 text-neutral-200"
             onClick={() => setHighlightedAlbumId(null)}
         >
-            {/* Header */}
-            <header
-                className="sticky top-0 z-40 border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-md px-4 py-3 sm:px-6 sm:py-4"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className="mx-auto max-w-screen-2xl flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                            <Logo className="h-8 w-8 text-emerald-500" />
-                            <h1 className="text-2xl font-bold tracking-tight text-white">
-                                Sonar
-                            </h1>
-                    </div>
-
-                    <div className="flex items-center gap-2 sm:gap-4">
-                        {/* Mobile View: Add Album & Menu */}
-                        <div className="flex sm:hidden items-center gap-2">
-                             <button
-                                onClick={() => setIsAddModalOpen(true)}
-                                className="flex items-center gap-2 rounded-full bg-white p-2 text-sm font-bold text-black hover:bg-neutral-200 transition-colors cursor-pointer"
-                            >
-                                <Plus size={20} />
-                            </button>
-            
-                            <Popover open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-                                <PopoverTrigger asChild>
-                                     <button className="rounded p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer">
-                                        <Menu size={20} />
-                                     </button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-56 bg-neutral-950 border-neutral-800 p-2" align="end">
-                                    <div className="flex flex-col gap-1">
-                                         <button
-                                            onClick={() => {
-                                                setIsStatsModalOpen(true);
-                                                setIsMobileMenuOpen(false);
-                                            }}
-                                            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-neutral-800 text-neutral-300 hover:text-emerald-400 transition-colors cursor-pointer w-full text-left"
-                                        >
-                                            <BarChart3 size={16} />
-                                            <span>Overview</span>
-                                        </button>
-                                         <Link
-                                            to="/history"
-                                            onClick={() => setIsMobileMenuOpen(false)}
-                                            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-neutral-800 text-neutral-300 hover:text-emerald-400 transition-colors cursor-pointer w-full text-left"
-                                        >
-                                            <Clock size={16} />
-                                            <span>History</span>
-                                        </Link>
-                                         <button
-                                            onClick={() => {
-                                                handleRandomPick();
-                                                setIsMobileMenuOpen(false);
-                                            }}
-                                            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-neutral-800 text-neutral-300 hover:text-emerald-400 transition-colors cursor-pointer w-full text-left"
-                                        >
-                                            <Shuffle size={16} />
-                                            <span>Pick Random</span>
-                                        </button>
-                                         <button
-                                            onClick={() => {
-                                                setIsImportModalOpen(true);
-                                                setIsMobileMenuOpen(false);
-                                            }}
-                                            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-neutral-800 text-neutral-300 hover:text-emerald-400 transition-colors cursor-pointer w-full text-left"
-                                        >
-                                            <Database size={16} />
-                                            <span>Import/Export</span>
-                                        </button>
-                                         <button
-                                            onClick={handleShareShelf}
-                                            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-neutral-800 text-neutral-300 hover:text-emerald-400 transition-colors cursor-pointer w-full text-left"
-                                        >
-                                            <Share2 size={16} />
-                                            <span>Share</span>
-                                        </button>
-                                         <div className="h-px bg-neutral-800 my-1" />
-                                        <button
-                                            onClick={() => {
-                                                logout();
-                                                setIsMobileMenuOpen(false);
-                                            }}
-                                            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-neutral-800 text-neutral-300 hover:text-red-400 transition-colors cursor-pointer w-full text-left"
-                                        >
-                                            <LogOut size={16} />
-                                            <span>Logout</span>
-                                        </button>
-                                    </div>
-                                </PopoverContent>
-                            </Popover>
-                        </div>
-
-                        {/* Desktop View: Full Toolbar */}
-                        <div className="hidden sm:flex items-center gap-4">
-                            <button
-                                onClick={handleRandomPick}
-                                className="flex items-center gap-2 rounded-full border border-neutral-700 px-4 py-2 text-sm font-medium hover:bg-neutral-800 hover:text-emerald-400 transition-colors cursor-pointer"
-                            >
-                                <Shuffle size={16} />
-                                <span className="hidden sm:inline">
-                                    Pick Random
-                                </span>
-                            </button>
-    
-                            <button
-                                onClick={() => setIsAddModalOpen(true)}
-                                className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-black hover:bg-neutral-200 transition-colors cursor-pointer"
-                            >
-                                <Plus size={16} />
-                                <span className="hidden sm:inline">Add Album</span>
-                            </button>
-
-                            <button
-                                onClick={() => setIsStatsModalOpen(true)}
-                                className="rounded p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer"
-                                title="Overview"
-                            >
-                                <BarChart3 size={20} />
-                            </button>
-    
-                            <Link
-                                to="/history"
-                                className="rounded p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer"
-                                title="History"
-                            >
-                                <Clock size={20} />
-                            </Link>
-    
-                            <button
-                                onClick={() => setIsImportModalOpen(true)}
-                                className="rounded p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer"
-                                title="Import/Export Data"
-                            >
-                                <Database size={20} />
-                            </button>
-    
-                            <button
-                                onClick={handleShareShelf}
-                                className="rounded p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer"
-                                title="Share Public Link"
-                            >
-                                <Share2 size={20} />
-                            </button>
-    
-                            <div className="h-6 w-px bg-neutral-800" />
-    
-                            <button
-                                onClick={logout}
-                                className="rounded p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors cursor-pointer"
-                                title="Logout"
-                            >
-                                <LogOut size={20} />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </header>
+            <Navbar onPickRandom={handleRandomPick} />
 
             <main
                 className="mx-auto max-w-screen-2xl px-4 sm:px-6 pt-6"
@@ -741,12 +558,7 @@ export default function Home() {
                     ) : filteredAlbums.length === 0 ? (
                         <div className="flex h-64 flex-col items-center justify-center border-2 border-dashed border-neutral-800 rounded-xl bg-neutral-900/50 text-neutral-500">
                             <p className="mb-4">No albums found.</p>
-                            <button
-                                onClick={() => setIsAddModalOpen(true)}
-                                className="text-emerald-500 hover:underline"
-                            >
-                                Add your first album
-                            </button>
+                            <p className="text-sm">Use the "Add Album" button in the header to get started.</p>
                         </div>
                     ) : groupedAlbums ? (
                         <div className="flex flex-col gap-8 pb-20">
@@ -914,32 +726,12 @@ export default function Home() {
                 </DndContext>
             </main>
 
-            <AddAlbumModal
-                isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
-                onAdd={addAlbum}
-            />
-
             <EditAlbumModal
                 isOpen={!!editingAlbum}
                 onClose={() => setEditingAlbum(null)}
                 album={editingAlbum}
                 onUpdate={updateAlbum}
                 onDelete={removeAlbum}
-            />
-
-            <ImportExportModal
-                isOpen={isImportModalOpen}
-                onClose={() => setIsImportModalOpen(false)}
-                albums={albums}
-                addAlbum={addAlbum}
-                removeAlbum={removeAlbum}
-            />
-
-            <StatsModal
-                isOpen={isStatsModalOpen}
-                onClose={() => setIsStatsModalOpen(false)}
-                albums={albums}
             />
 
             <RandomSpinModal

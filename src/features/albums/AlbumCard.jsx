@@ -1,4 +1,4 @@
-import { Star, Heart, Clock, StickyNote, Play } from "lucide-react";
+import { Heart, Clock, StickyNote, Play } from "lucide-react";
 import Logo from "../../components/ui/Logo";
 import { useLogListen } from "../../hooks/useHistory";
 import { formatRelativeTime } from "../../lib/utils";
@@ -82,17 +82,7 @@ export default function AlbumCard({
                 <div className="flex flex-col gap-1 items-end">
                     {/* Badges */}
                     <div className="flex flex-col gap-1 items-end">
-                        {album.rating > 0 && (
-                            <div className="flex gap-0.5 bg-black/40 backdrop-blur-md px-1.5 py-1 rounded-full border border-white/10 shadow-sm">
-                                <Star
-                                    size={10}
-                                    className="text-yellow-400 fill-yellow-400"
-                                />
-                                <span className="text-[10px] font-bold text-white leading-none">
-                                    {album.rating}
-                                </span>
-                            </div>
-                        )}
+
                         {album.notes && (
                             <div className="flex gap-0.5 bg-black/40 backdrop-blur-md px-1.5 py-1 rounded-full text-white border border-white/10">
                                 <StickyNote

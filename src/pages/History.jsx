@@ -3,25 +3,28 @@ import { useHistory } from '../hooks/useHistory';
 import { ArrowLeft, Clock, Music, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatRelativeTime } from '../lib/utils';
+import { Navbar } from '../components/layout/Navbar';
 
 export default function History() {
   const { history, loading, removeHistoryItem } = useHistory();
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white p-4 pb-20 sm:p-8">
-      <div className="max-w-3xl mx-auto space-y-6">
+    <div className="min-h-screen bg-neutral-950 text-white">
+      <Navbar />
+      <main className="mx-auto max-w-screen-2xl px-4 sm:px-6 pt-6 pb-20 space-y-6">
+
         {/* Header */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <Clock className="text-emerald-500" size={28} />
+            <h1 className="text-3xl font-bold">Listening History</h1>
+          </div>
           <Link 
             to="/" 
             className="p-2 rounded-full hover:bg-neutral-900 text-neutral-400 hover:text-white transition-colors"
           >
             <ArrowLeft size={24} />
           </Link>
-          <div className="flex items-center gap-2">
-            <Clock className="text-emerald-500" size={28} />
-            <h1 className="text-3xl font-bold">Listening History</h1>
-          </div>
         </div>
 
         {/* Content */}
@@ -75,7 +78,7 @@ export default function History() {
                 ))}
             </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
