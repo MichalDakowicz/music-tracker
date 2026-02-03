@@ -7,8 +7,11 @@ import Home from "./pages/Home";
 import History from "./pages/History";
 import SharedShelf from "./pages/SharedShelf";
 import Stats from "./pages/Stats";
+import PublicFriends from "./pages/PublicFriends";
 import Settings from "./pages/Settings";
+import Friends from "./pages/Friends";
 import AppUrlListener from "./components/AppUrlListener";
+import FriendRequestListener from "./features/friends/FriendRequestListener";
 import SwipeNavigator from "./components/layout/SwipeNavigator";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -21,16 +24,26 @@ function App() {
         <ToastProvider>
         <BrowserRouter>
           <AppUrlListener />
+          <FriendRequestListener />
           <SwipeNavigator />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/u/:userId" element={<SharedShelf />} />
             <Route path="/u/:userId/stats" element={<Stats />} />
+            <Route path="/u/:userId/friends" element={<PublicFriends />} />
             <Route
               path="/"
               element={
                 <ProtectedRoute>
                   <Home />
+                </ProtectedRoute>
+              }
+            />
+             <Route
+              path="/friends"
+              element={
+                <ProtectedRoute>
+                  <Friends />
                 </ProtectedRoute>
               }
             />

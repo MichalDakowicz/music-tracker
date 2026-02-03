@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import Logo from "../ui/Logo";
-import { BarChart3, Clock, LogOut, LayoutGrid, Plus, Share2, Shuffle, Settings } from "lucide-react";
+import { BarChart3, Clock, LogOut, LayoutGrid, Plus, Share2, Shuffle, Settings, Users } from "lucide-react";
 import { useAuth } from "../../features/auth/AuthContext";
 import { useToast } from "../ui/Toast";
 import { useAlbums } from "../../hooks/useAlbums";
@@ -77,6 +77,13 @@ export function Navbar({ onPickRandom }) {
             >
               <Clock size={20} />
             </Link>
+            <Link
+              to="/friends"
+              className={`hidden min-[780px]:block p-2 rounded-md transition-colors ${isActive('/friends') ? 'text-white bg-neutral-800' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'}`}
+              title="Friends"
+            >
+              <Users size={20} />
+            </Link>
 
             <button
                 onClick={handleShareShelf}
@@ -137,6 +144,15 @@ export function Navbar({ onPickRandom }) {
                 >
                     <Clock size={24} />
                     <span className="text-[10px] font-medium">History</span>
+                </Link>
+                <Link
+                    to="/friends"
+                    className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
+                        isActive('/friends') ? 'text-emerald-500' : 'text-neutral-400'
+                    }`}
+                >
+                    <Users size={24} />
+                    <span className="text-[10px] font-medium">Friends</span>
                 </Link>
                 <Link
                     to="/settings"

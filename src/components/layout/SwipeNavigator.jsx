@@ -1,11 +1,18 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useFriendVisibility } from '../../hooks/useFriendVisibility';
 
 const MIN_SWIPE_DISTANCE = 50;
+const SWIPE_TIMEOUT = 500; // ms
 
 export default function SwipeNavigator() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Extract userId if we are on a public route to check visibility
+  const publicPathMatch = location.pathname.match(/^\/u\/([^/]+)/);
+  const userId = publicPathMatch ? publicPathMatch[1] : null;
+  const { showFriends } = useFriendVisibility(userId);
 
   useEffect(() => {
     let touchStartX = 0;
@@ -51,13 +58,15 @@ export default function SwipeNavigator() {
       // Check if horizontal swipe is dominant and long enough
       if (Math.abs(distanceX) > Math.abs(distanceY) && Math.abs(distanceX) > MIN_SWIPE_DISTANCE) {
          // Prevent triggering if swipe took too long (slow drag)
-         if (duration > 1000) return;
+         if (duration > SWIPE_TIMEOUT) return;
 
-        const appRoutes = ['/', '/stats', '/history', '/settings'];
+        // Internal app routes matching Navbar order
+        const appRoutes = ['/', '/stats', '/history', '/friends', '/settings'];
         const appIndex = appRoutes.indexOf(location.pathname);
         
-        // Check for public shelf routes: /u/:userId or /u/:userId/stats
-        const publicMatch = location.pathname.match(/^\/u\/([^/]+)(\/stats)?$/);
+        // Public routes configuration
+        // Pages: Library -> Stats -> Friends (if enabled)
+        const publicMatch = location.pathname.match(/^\/u\/([^/]+)(\/(stats|friends))?$/);
 
         if (appIndex !== -1) {
             if (distanceX > 0) {
@@ -72,23 +81,36 @@ export default function SwipeNavigator() {
                 }
             }
         } else if (publicMatch) {
-            const userId = publicMatch[1];
-            const isStats = !!publicMatch[2]; // true if /stats is present
+            const currentId = publicMatch[1]; // Should match userId from outer scope, but safe to use
+            const subPage = publicMatch[3] || 'library'; // 'stats', 'friends' or undefined ('library')
 
-            if (distanceX > 0 && !isStats) {
-                // On Public Home, Swipe Left -> Go to Stats
-                navigate(`/u/${userId}/stats`);
-            } else if (distanceX < 0 && isStats) {
-                // On Public Stats, Swipe Right -> Go to Home
-                navigate(`/u/${userId}`);
+            // Define order
+            const pages = ['library', 'stats'];
+            if (showFriends) {
+                pages.push('friends');
+            }
+
+            const currentIndex = pages.indexOf(subPage);
+            
+            if (currentIndex !== -1) {
+                if (distanceX > 0) {
+                    // Next
+                    if (currentIndex < pages.length - 1) {
+                        const nextPage = pages[currentIndex + 1];
+                        navigate(nextPage === 'library' ? `/u/${currentId}` : `/u/${currentId}/${nextPage}`);
+                    }
+                } else {
+                    // Prev
+                    if (currentIndex > 0) {
+                        const prevPage = pages[currentIndex - 1];
+                        navigate(prevPage === 'library' ? `/u/${currentId}` : `/u/${currentId}/${prevPage}`);
+                    }
+                }
             }
         }
       }
     };
 
-    // Use capture: false (bubble phase) so we don't interfere with other handlers immediately
-    // Or maybe check start/move to determine intent.
-    
     window.addEventListener('touchstart', onTouchStart);
     window.addEventListener('touchmove', onTouchMove);
     window.addEventListener('touchend', onTouchEnd);
@@ -98,7 +120,7 @@ export default function SwipeNavigator() {
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
     };
-  }, [location.pathname, navigate]);
+  }, [location.pathname, navigate, showFriends]); // Add showFriends to dependency
 
   return null;
 }
