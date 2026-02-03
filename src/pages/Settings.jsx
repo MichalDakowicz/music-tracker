@@ -7,7 +7,7 @@ import ImportExportModal from "../features/settings/ImportExportModal";
 import LegacyImportModal from "../features/settings/LegacyImportModal";
 import EditProfileModal from "../features/settings/EditProfileModal";
 import { useToast } from "../components/ui/Toast";
-import { LogOut, Database, Share2, User, ChevronRight, Settings as SettingsIcon, FileJson, Edit2, RotateCw, Globe, Users } from "lucide-react";
+import { LogOut, Database, Share2, User, ChevronRight, Settings as SettingsIcon, FileJson, Edit2, RotateCw, Globe, Users, Lock, Monitor, LayoutGrid } from "lucide-react";
 import { ref, update, get, set } from "firebase/database";
 import { db } from "../lib/firebase";
 
@@ -25,6 +25,25 @@ export default function Settings() {
     const [friendsVisibility, setFriendsVisibility] = useState("friends"); // 'friends' | 'noone'
     const [loadingPrivacy, setLoadingPrivacy] = useState(true);
 
+    // Appearance State
+    const [gridSize, setGridSize] = useState(() => {
+        try {
+            const saved = localStorage.getItem("mt_gridSize");
+            return saved ? JSON.parse(saved) : "normal";
+        } catch (e) {
+            return "normal";
+        }
+    });
+
+    const handleGridSizeChange = (newSize) => {
+        setGridSize(newSize);
+        localStorage.setItem("mt_gridSize", JSON.stringify(newSize));
+        toast({
+            title: "Grid Size Updated",
+            description: `Layout set to ${newSize} mode.`
+        });
+    };
+
     useEffect(() => {
         if (!user) return;
         const fetchPrivacy = async () => {
@@ -37,18 +56,21 @@ export default function Settings() {
         fetchPrivacy();
     }, [user]);
     
-    const handlePrivacyToggle = async () => {
-        const newVal = friendsVisibility === 'friends' ? 'noone' : 'friends';
+    const handlePrivacyChange = async (newVal) => {
+        if (newVal === friendsVisibility) return;
+        const oldVal = friendsVisibility;
         setFriendsVisibility(newVal);
         try {
             await set(ref(db, `users/${user.uid}/settings/privacy/friendsVisibility`), newVal);
              toast({
                 title: "Privacy Updated",
-                description: `Friends list is now visible to: ${newVal === 'friends' ? 'Friends' : 'Only Me'}`,
+                description: `Visibility set to: ${
+                    newVal === 'public' ? 'Public' : newVal === 'friends' ? 'Friends Only' : 'Only Me'
+                }`,
             });
         } catch (e) {
             console.error(e);
-            setFriendsVisibility(friendsVisibility); // Revert
+            setFriendsVisibility(oldVal); // Revert
              toast({
                 title: "Update Failed",
                 variant: 'destructive'
@@ -61,7 +83,7 @@ export default function Settings() {
 
     const handleShareShelf = () => {
         if (!user) return;
-        const url = `https://music-tracker-89fe5.web.app/u/${user.uid}`;
+        const url = `https://sonar-tracker.web.app/u/${user.uid}`;
         navigator.clipboard.writeText(url);
         toast({
             title: "Link Copied!",
@@ -190,27 +212,107 @@ export default function Settings() {
                             </h2>
                         </div>
                         <div className="p-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <div>
-                                    <h3 className="font-medium text-white">Friends List Visibility</h3>
-                                    <p className="text-sm text-neutral-400">Control who can see your friends on your public profile</p>
-                                </div>
+                            <div className="mb-4">
+                                <h3 className="font-medium text-white">Friends List Visibility</h3>
+                                <p className="text-sm text-neutral-400">Control who can see your friends on your public profile</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <button
-                                    onClick={handlePrivacyToggle}
+                                    onClick={() => handlePrivacyChange('noone')}
                                     disabled={loadingPrivacy}
-                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-neutral-900 ${
-                                        friendsVisibility === 'friends' ? 'bg-emerald-600' : 'bg-neutral-700'
+                                    className={`flex flex-col items-center justify-center p-4 rounded-lg border transition-all ${
+                                        friendsVisibility === 'noone' 
+                                        ? 'bg-red-900/20 border-red-500/50 text-white' 
+                                        : 'bg-neutral-800/50 border-transparent text-neutral-400 hover:bg-neutral-800'
                                     }`}
                                 >
-                                    <span
-                                        className={`${
-                                            friendsVisibility === 'friends' ? 'translate-x-6' : 'translate-x-1'
-                                        } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                                    />
+                                    <Lock className={`mb-2 w-6 h-6 ${friendsVisibility === 'noone' ? 'text-red-400' : ''}`} />
+                                    <span className="font-medium">Only Me</span>
+                                    <span className="text-xs opacity-70">Private</span>
+                                </button>
+
+                                <button
+                                    onClick={() => handlePrivacyChange('friends')}
+                                    disabled={loadingPrivacy}
+                                    className={`flex flex-col items-center justify-center p-4 rounded-lg border transition-all ${
+                                        friendsVisibility === 'friends' 
+                                        ? 'bg-emerald-900/20 border-emerald-500/50 text-white' 
+                                        : 'bg-neutral-800/50 border-transparent text-neutral-400 hover:bg-neutral-800'
+                                    }`}
+                                >
+                                    <Users className={`mb-2 w-6 h-6 ${friendsVisibility === 'friends' ? 'text-emerald-400' : ''}`} />
+                                    <span className="font-medium">Friends</span>
+                                    <span className="text-xs opacity-70">Friends Only</span>
+                                </button>
+
+                                <button
+                                    onClick={() => handlePrivacyChange('public')}
+                                    disabled={loadingPrivacy}
+                                    className={`flex flex-col items-center justify-center p-4 rounded-lg border transition-all ${
+                                        friendsVisibility === 'public' 
+                                        ? 'bg-blue-900/20 border-blue-500/50 text-white' 
+                                        : 'bg-neutral-800/50 border-transparent text-neutral-400 hover:bg-neutral-800'
+                                    }`}
+                                >
+                                    <Globe className={`mb-2 w-6 h-6 ${friendsVisibility === 'public' ? 'text-blue-400' : ''}`} />
+                                    <span className="font-medium">Public</span>
+                                    <span className="text-xs opacity-70">Anyone with link</span>
                                 </button>
                             </div>
-                            <div className="text-xs text-neutral-500 bg-neutral-900/50 p-3 rounded border border-neutral-800">
-                                Current setting: <span className="text-emerald-400 font-bold uppercase">{friendsVisibility === 'friends' ? 'Friends Only' : 'Only Me'}</span>
+                        </div>
+                    </section>
+
+                    {/* Appearance Section */}
+                    <section className="bg-neutral-900/50 border border-neutral-800 rounded-xl overflow-hidden">
+                        <div className="px-6 py-4 border-b border-neutral-800">
+                            <h2 className="text-lg font-semibold flex items-center gap-2">
+                                <Monitor className="w-5 h-5 text-neutral-400" />
+                                Appearance
+                            </h2>
+                        </div>
+                        <div className="p-6">
+                             <div className="mb-4">
+                                <h3 className="font-medium text-white">Grid Size</h3>
+                                <p className="text-sm text-neutral-400">Adjust the size of album cards in the grid view</p>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-3">
+                                <button
+                                    onClick={() => handleGridSizeChange('compact')}
+                                    className={`flex flex-col items-center justify-center p-4 rounded-lg border transition-all ${
+                                        gridSize === 'compact' 
+                                        ? 'bg-emerald-900/20 border-emerald-500/50 text-white' 
+                                        : 'bg-neutral-800/50 border-transparent text-neutral-400 hover:bg-neutral-800'
+                                    }`}
+                                >
+                                    <LayoutGrid className={`mb-2 w-6 h-6 ${gridSize === 'compact' ? 'text-emerald-400' : ''} scale-75`} />
+                                    <span className="font-medium">Compact</span>
+                                </button>
+
+                                <button
+                                    onClick={() => handleGridSizeChange('normal')}
+                                    className={`flex flex-col items-center justify-center p-4 rounded-lg border transition-all ${
+                                        gridSize === 'normal' 
+                                        ? 'bg-emerald-900/20 border-emerald-500/50 text-white' 
+                                        : 'bg-neutral-800/50 border-transparent text-neutral-400 hover:bg-neutral-800'
+                                    }`}
+                                >
+                                    <LayoutGrid className={`mb-2 w-6 h-6 ${gridSize === 'normal' ? 'text-emerald-400' : ''}`} />
+                                    <span className="font-medium">Normal</span>
+                                </button>
+
+                                <button
+                                    onClick={() => handleGridSizeChange('large')}
+                                    className={`flex flex-col items-center justify-center p-4 rounded-lg border transition-all ${
+                                        gridSize === 'large' 
+                                        ? 'bg-emerald-900/20 border-emerald-500/50 text-white' 
+                                        : 'bg-neutral-800/50 border-transparent text-neutral-400 hover:bg-neutral-800'
+                                    }`}
+                                >
+                                    <LayoutGrid className={`mb-2 w-6 h-6 ${gridSize === 'large' ? 'text-emerald-400' : ''} scale-125`} />
+                                    <span className="font-medium">Large</span>
+                                </button>
                             </div>
                         </div>
                     </section>

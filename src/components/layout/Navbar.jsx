@@ -18,7 +18,7 @@ export function Navbar({ onPickRandom }) {
 
   const handleShareShelf = () => {
     if (!user) return;
-    const url = `https://music-tracker-89fe5.web.app/u/${user.uid}`;
+    const url = `https://sonar-tracker.web.app/u/${user.uid}`;
     navigator.clipboard.writeText(url);
     toast({
         title: "Link Copied!",

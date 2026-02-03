@@ -1,4 +1,4 @@
-package com.michaldakowicz.musictracker;
+package com.michaldakowicz.sonar;
 
 import android.os.Bundle;
 import com.getcapacitor.BridgeActivity;

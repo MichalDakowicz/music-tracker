@@ -8,6 +8,7 @@ export default function ImportExportModal({ isOpen, onClose, albums, addAlbum, r
   const [isImporting, setIsImporting] = useState(false);
   const [importLog, setImportLog] = useState([]); // { status: 'success'|'error', message: string }
   const [showOtherItems, setShowOtherItems] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Filter count to match Stats/Home view (owned albums only)
   const collectionAlbums = albums.filter(a => !a.status || a.status === 'Collection');
@@ -392,7 +393,40 @@ export default function ImportExportModal({ isOpen, onClose, albums, addAlbum, r
                         </div>
                         
                         <div className="flex items-center justify-center w-full">
-                            <label htmlFor="json-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-neutral-800 border-dashed rounded-lg cursor-pointer bg-neutral-950/50 hover:bg-neutral-900 hover:border-emerald-500/50 transition-colors">
+                            <label 
+                                htmlFor="json-upload" 
+                                className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+                                    isDragging 
+                                    ? "border-emerald-500 bg-emerald-900/20" 
+                                    : "border-neutral-800 bg-neutral-950/50 hover:bg-neutral-900 hover:border-emerald-500/50"
+                                }`}
+                                onDragOver={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setIsDragging(true);
+                                }}
+                                onDragEnter={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setIsDragging(true);
+                                }}
+                                onDragLeave={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setIsDragging(false);
+                                }}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setIsDragging(false);
+                                    const file = e.dataTransfer.files?.[0];
+                                    if (file) {
+                                        const reader = new FileReader();
+                                        reader.onload = (e) => setImportText(e.target.result);
+                                        reader.readAsText(file);
+                                    }
+                                }}
+                            >
                                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                     <div className="flex gap-2 mb-3 text-neutral-400">
                                         <FileJson className="w-8 h-8" />

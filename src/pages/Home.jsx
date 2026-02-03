@@ -106,9 +106,21 @@ export default function Home() {
     const { toast } = useToast();
 
     const [viewMode, setViewMode] = usePersistedState("mt_viewMode", "grid");
+    const [gridSize] = usePersistedState("mt_gridSize", "normal");
     const [groupBy, setGroupBy] = usePersistedState("mt_groupBy", "none");
     const [isSpinModalOpen, setIsSpinModalOpen] = useState(false);
     const [editingAlbum, setEditingAlbum] = useState(null);
+
+    const gridClasses = useMemo(() => {
+        switch (gridSize) {
+            case "compact":
+                return "grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 p-2";
+            case "large":
+                return "grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-2";
+            default:
+                return "grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-2";
+        }
+    }, [gridSize]);
     const [searchQuery, setSearchQuery] = useState("");
 
     const [filterFormat, setFilterFormat] = usePersistedState(
@@ -572,7 +584,7 @@ export default function Home() {
                                         </span>
                                     </h2>
                                     {viewMode === "grid" ? (
-                                        <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-2">
+                                        <div className={gridClasses}>
                                             {group.albums.map((album) => (
                                                 <AlbumCard
                                                     key={album.id}
@@ -644,7 +656,7 @@ export default function Home() {
                             disabled={!isReorderEnabled}
                         >
                             {viewMode === "grid" ? (
-                                <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-2 pb-20">
+                                <div className={`${gridClasses} pb-20`}>
                                     {filteredAlbums.map((album) => (
                                         <SortableAlbum
                                             key={album.id}

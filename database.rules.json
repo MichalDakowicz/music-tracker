@@ -41,7 +41,7 @@
           }
         },
         "friends": {
-          ".read": "$uid === auth.uid || root.child('users').child($uid).child('settings').child('privacy').child('friendsVisibility').val() !== 'noone'",
+          ".read": "$uid === auth.uid || root.child('users').child($uid).child('settings').child('privacy').child('friendsVisibility').val() === 'public' || (auth != null && root.child('users').child($uid).child('settings').child('privacy').child('friendsVisibility').val() !== 'noone' && root.child('users').child($uid).child('friends').child(auth.uid).val() === true)",
           "$friendUid": {
             ".write": "$uid === auth.uid || (auth.uid === $friendUid && ((newData.val() === true && root.child('users').child(auth.uid).child('friendRequests').child($uid).exists()) || (!newData.exists() && data.exists())))"
           }
