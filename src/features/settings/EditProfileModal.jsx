@@ -143,7 +143,12 @@ export default function EditProfileModal({ isOpen, onClose }) {
 
     return (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-xl shadow-xl flex flex-col max-h-[90vh]">
+            <div 
+                className="w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-xl shadow-xl flex flex-col max-h-[90vh]"
+                onTouchStart={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => e.stopPropagation()}
+            >
                 <div className="border-b border-neutral-800 p-4 flex items-center justify-between">
                      <h2 className="text-xl font-bold text-white">{isCropping ? "Crop Image" : "Edit Profile"}</h2>
                      <button onClick={handleClose} className="text-neutral-400 hover:text-white">

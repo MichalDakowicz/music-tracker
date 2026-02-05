@@ -11,6 +11,9 @@ export default function AlbumDetailsModal({ isOpen, onClose, album }) {
       <div 
         className="relative w-full max-w-2xl overflow-hidden rounded-2xl bg-neutral-900 border border-neutral-800 shadow-2xl max-h-[90vh] flex flex-col animate-in slide-in-from-bottom-4 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
       >
         {/* Header Image Background */}
         <div className="relative h-48 w-full shrink-0 overflow-hidden">

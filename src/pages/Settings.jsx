@@ -137,10 +137,7 @@ export default function Settings() {
                     onClose={() => setIsEditProfileOpen(false)} 
                 />
 
-                <div className="flex items-center gap-3 mb-8">
-                        <SettingsIcon className="text-emerald-500" size={32} />
-                    <h1 className="text-3xl font-bold">Settings</h1>
-                </div>
+               
 
                 <div className="space-y-6">
                     {/* Account Section */}

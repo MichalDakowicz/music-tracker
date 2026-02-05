@@ -271,6 +271,9 @@ export default function ImportExportModal({ isOpen, onClose, albums, addAlbum, r
       <div 
         className="w-full max-w-2xl overflow-hidden rounded-2xl bg-neutral-900 border border-neutral-800 shadow-2xl flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-neutral-800 p-6">

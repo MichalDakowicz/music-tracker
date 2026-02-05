@@ -77,13 +77,15 @@ export default function AlbumRow({ album, onClick, isHighlighted, innerRef }) {
       </div>
       
       <div className="w-20 flex justify-end gap-2 items-center" onClick={(e) => e.stopPropagation()}>
-        <button
-            onClick={handleLogListen}
-            className="p-1.5 rounded-full text-neutral-500 hover:text-white hover:bg-neutral-800 transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-            title="Log Listen"
-        >
-            <Play size={20} className="fill-current" />
-        </button>
+        {album.status !== "Wishlist" && (
+            <button
+                onClick={handleLogListen}
+                className="p-1.5 rounded-full text-neutral-500 hover:text-white hover:bg-neutral-800 transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                title="Log Listen"
+            >
+                <Play size={20} className="fill-current" />
+            </button>
+        )}
 
         {album.url && (
             <a 

@@ -73,6 +73,9 @@ export default function RandomSpinModal({ isOpen, onClose, albums, onSelect }) {
       <div 
         className="w-full max-w-sm bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden relative animate-in slide-in-from-bottom-4 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
       >
         <button 
             onClick={onClose} 
@@ -139,18 +142,20 @@ export default function RandomSpinModal({ isOpen, onClose, albums, onSelect }) {
                         Spin Again
                     </button>
                     
-                    <button 
-                        onClick={() => {
-                            if (winner) {
-                                logListen(winner);
-                                onClose();
-                            }
-                        }}
-                        className="flex-1 py-3 rounded-lg bg-white text-black font-bold hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2"
-                    >
-                        <Play size={18} fill="currentColor" />
-                        Log Listen
-                    </button>
+                    {winner.status !== "Wishlist" && (
+                        <button 
+                            onClick={() => {
+                                if (winner) {
+                                    logListen(winner);
+                                    onClose();
+                                }
+                            }}
+                            className="flex-1 py-3 rounded-lg bg-white text-black font-bold hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2"
+                        >
+                            <Play size={18} fill="currentColor" />
+                            Log Listen
+                        </button>
+                    )}
                 </div>
             )}
         </div>

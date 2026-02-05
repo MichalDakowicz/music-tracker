@@ -129,6 +129,9 @@ export default function EditAlbumModal({ isOpen, onClose, album, onUpdate, onDel
       <div 
         className="w-full max-w-2xl rounded-xl bg-neutral-900 border border-neutral-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 zoom-in-95 duration-300" 
         onClick={e => e.stopPropagation()}
+        onTouchStart={e => e.stopPropagation()}
+        onTouchMove={e => e.stopPropagation()}
+        onTouchEnd={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-neutral-800 p-4 shrink-0 bg-neutral-900 z-10">
           <h2 className="text-lg font-bold text-white">Edit Album</h2>

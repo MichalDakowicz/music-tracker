@@ -16,6 +16,7 @@ export default function AddAlbumModal({ isOpen, onClose, onAdd }) {
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState([]);
   const [coverUrl, setCoverUrl] = useState("");
+  const [albumUrl, setAlbumUrl] = useState("");
   const [releaseDate, setReleaseDate] = useState("");
   const [formats, setFormats] = useState(["Digital"]);
   const [artistInput, setArtistInput] = useState("");
@@ -48,6 +49,7 @@ export default function AddAlbumModal({ isOpen, onClose, onAdd }) {
     setTitle("");
     setArtist([]);
     setCoverUrl("");
+    setAlbumUrl("");
     setReleaseDate("");
     setStatus("Collection");
     
@@ -76,6 +78,7 @@ export default function AddAlbumModal({ isOpen, onClose, onAdd }) {
           setArtist([]);
       }
       setCoverUrl(preview.coverUrl || "");
+      setAlbumUrl(preview.url || "");
       setReleaseDate(preview.releaseDate || "");
     }
   }, [preview]);
@@ -154,6 +157,7 @@ export default function AddAlbumModal({ isOpen, onClose, onAdd }) {
         title,
         artist,
         coverUrl,
+        albumUrl,
         releaseDate,
         format: formats,
         status,
@@ -202,6 +206,9 @@ export default function AddAlbumModal({ isOpen, onClose, onAdd }) {
       <div 
         className="w-full max-w-2xl rounded-xl bg-neutral-900 border border-neutral-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-neutral-800 p-4 shrink-0 bg-neutral-900/50 backdrop-blur-md z-10">
           <div className="flex flex-col">
